@@ -1,31 +1,32 @@
 <?php
 
-namespace Codenson\Daraja\Exceptions;
-
-use Exception;
-
-class DarajaException extends Exception
-{
-    /**
-     * Create a new Daraja exception instance.
-     */
-    public function __construct(string $message, int $code = 0, Exception $previous = null)
+if (!function_exists('daraja')) {
+    function daraja()
     {
-        parent::__construct($message, $code, $previous);
+        return app('daraja');
     }
+}
 
-    /**
-     * Report the exception.
-     */
-    public function report(): void
+if (!function_exists('formatPhoneNumber')) {
+    function formatPhoneNumber(string $phoneNumber): string
     {
-        // Log the exception
-        if (config('daraja.logging.enabled')) {
-            logger()->error('Daraja API Error: ' . $this->getMessage(), [
-                'code' => $this->getCode(),
-                'file' => $this->getFile(),
-                'line' => $this->getLine(),
-            ]);
+        $phoneNumber = preg_replace('/[^0-9]/', '', $phoneNumber);
+        
+        if (substr($phoneNumber, 0, 1) === '0') {
+            $phoneNumber = '254' . substr($phoneNumber, 1);
+        } elseif (substr($phoneNumber, 0, 4) === '2540') {
+            $phoneNumber = '254' . substr($phoneNumber, 4);
+        } elseif (substr($phoneNumber, 0, 4) === '+254') {
+            $phoneNumber = '254' . substr($phoneNumber, 4);
         }
+        
+        return $phoneNumber;
+    }
+}
+
+if (!function_exists('formatMoney')) {
+    function formatMoney(float $amount): int
+    {
+        return (int) round($amount);
     }
 }

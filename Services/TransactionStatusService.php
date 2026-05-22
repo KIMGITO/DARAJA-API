@@ -19,15 +19,7 @@ class TransactionStatusService
     }
 
     /**
-     * Query transaction status
-     * 
-     * @param array $data {
-     *     transaction_id: string (M-PESA receipt number),
-     *     remarks: string,
-     *     occasion?: string,
-     *     identifier_type?: int (1=MSISDN,2=Till,3=Shortcode,4=Organization)
-     * }
-     *  @return array|object
+     * @return array|object
      */
     public function query(array $data)
     {
@@ -58,7 +50,7 @@ class TransactionStatusService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

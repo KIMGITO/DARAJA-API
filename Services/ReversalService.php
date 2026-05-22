@@ -19,16 +19,7 @@ class ReversalService
     }
 
     /**
-     * Reverse a transaction
-     * 
-     * @param array $data {
-     *     transaction_id: string (M-PESA receipt number to reverse),
-     *     amount: float,
-     *     receiver_shortcode?: string,
-     *     remarks?: string,
-     *     occasion?: string
-     * }
-     *  @return array|object
+     * @return array|object
      */
     public function reverse(array $data)
     {
@@ -60,7 +51,7 @@ class ReversalService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

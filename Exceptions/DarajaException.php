@@ -9,7 +9,7 @@ class DarajaException extends Exception
     /**
      * Create a new Daraja exception instance.
      */
-    public function __construct(string $message, int $code = 0, Exception $previous = null)
+    public function __construct(string $message, int $code = 0, ?Exception $previous = null)
     {
         parent::__construct($message, $code, $previous);
     }
@@ -19,7 +19,6 @@ class DarajaException extends Exception
      */
     public function report(): void
     {
-        // Log the exception
         if (config('daraja.logging.enabled')) {
             logger()->error('Daraja API Error: ' . $this->getMessage(), [
                 'code' => $this->getCode(),
