@@ -1,5 +1,5 @@
 {
-    "name": "",
+    "name": "codenson/daraja-api",
     "description": "A comprehensive Laravel package for Safaricom Daraja APIs - M-PESA integration made easy",
     "type": "library",
     "license": "MIT",
