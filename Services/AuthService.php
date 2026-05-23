@@ -8,9 +8,9 @@ use Codenson\Daraja\Exceptions\DarajaException;
 
 class AuthService
 {
-    protected $client;
-    protected $config;
-    protected $baseUrl;
+    protected Client $client;
+    protected array $config;
+    protected string $baseUrl;
 
     public function __construct(array $config)
     {
@@ -21,6 +21,9 @@ class AuthService
 
     /**
      * Get OAuth access token
+     * 
+     * @return string
+     * @throws DarajaException
      */
     public function getAccessToken(): string
     {
@@ -43,7 +46,6 @@ class AuthService
             throw new DarajaException('Failed to get access token: ' . json_encode($data));
         }
 
-        // Cache token for 50 minutes (expires in 1 hour)
         Cache::put($cacheKey, $data['access_token'], 3000);
 
         return $data['access_token'];

@@ -1,67 +1,23 @@
 <?php
 
 return [
-    /*
-    |--------------------------------------------------------------------------
-    | Daraja API Environment
-    |--------------------------------------------------------------------------
-    |
-    | Set to 'sandbox' for testing or 'production' for live environment
-    |
-    */
     'environment' => env('MPESA_ENVIRONMENT', 'sandbox'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Consumer Key
-    |--------------------------------------------------------------------------
-    |
-    | Your Daraja app consumer key from Safaricom
-    |
-    */
     'consumer_key' => env('MPESA_CONSUMER_KEY', ''),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Consumer Secret
-    |--------------------------------------------------------------------------
-    |
-    | Your Daraja app consumer secret from Safaricom
-    |
-    */
     'consumer_secret' => env('MPESA_CONSUMER_SECRET', ''),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Shortcode/Paybill/Till Number
-    |--------------------------------------------------------------------------
-    |
-    | Your M-PESA shortcode, paybill or till number
-    |
-    */
     'shortcode' => env('MPESA_SHORTCODE', ''),
-    
     'paybill' => env('MPESA_PAYBILL', ''),
     'till_number' => env('MPESA_TILL_NUMBER', ''),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Passkey
-    |--------------------------------------------------------------------------
-    |
-    | Your M-PESA passkey for STK Push
-    |
-    */
     'passkey' => env('MPESA_PASSKEY', ''),
+    'initiator' => env('MPESA_INITIATOR_NAME', ''),
+    'initiator_password' => env('MPESA_INITIATOR_PASSWORD', ''),
+    'security_credential' => env('MPESA_SECURITY_CREDENTIAL', ''),
+    'result_type' => env('MPESA_RESULT_TYPE', 'array'),
+    'timeout' => env('MPESA_TIMEOUT', 30),
+    'logging' => [
+        'enabled' => env('MPESA_LOGGING', true),
+        'channel' => env('MPESA_LOG_CHANNEL', 'daily'),
+    ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | Callback URLs
-    |--------------------------------------------------------------------------
-    |
-    | URLs where M-PESA will send transaction results
-    |
-    */
     'callback_urls' => [
         'stk_push' => env('MPESA_STK_CALLBACK_URL', null),
         'c2b_confirmation' => env('MPESA_C2B_CONFIRMATION_URL', null),
@@ -73,14 +29,6 @@ return [
         'reversal' => env('MPESA_REVERSAL_URL', null),
     ],
 
-    /*
-    |--------------------------------------------------------------------------
-    | API Endpoints
-    |--------------------------------------------------------------------------
-    |
-    | Daraja API endpoints (don't modify unless updated by Safaricom)
-    |
-    */
     'endpoints' => [
         'sandbox' => [
             'auth' => 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials',
@@ -92,7 +40,7 @@ return [
             'transaction_status' => 'https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query',
             'account_balance' => 'https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query',
             'reversal' => 'https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request',
-            'tax_remittance' => 'https://apisandbox.safaricom.et/mpesa/taxremittance/v1/remit',
+            'tax_remittance' => 'https://sandbox.safaricom.co.ke/mpesa/taxremittance/v1/remit',
             'business_paybill' => 'https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest',
             'business_buygoods' => 'https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest',
             'bill_manager' => 'https://sandbox.safaricom.co.ke/mpesa/billmanager/v1/create',
@@ -115,7 +63,7 @@ return [
             'transaction_status' => 'https://api.safaricom.co.ke/mpesa/transactionstatus/v1/query',
             'account_balance' => 'https://api.safaricom.co.ke/mpesa/accountbalance/v1/query',
             'reversal' => 'https://api.safaricom.co.ke/mpesa/reversal/v1/request',
-            'tax_remittance' => 'https://api.safaricom.et/mpesa/taxremittance/v1/remit',
+            'tax_remittance' => 'https://api.safaricom.co.ke/mpesa/taxremittance/v1/remit',
             'business_paybill' => 'https://api.safaricom.co.ke/mpesa/b2b/v1/paymentrequest',
             'business_buygoods' => 'https://api.safaricom.co.ke/mpesa/b2b/v1/paymentrequest',
             'bill_manager' => 'https://api.safaricom.co.ke/mpesa/billmanager/v1/create',
@@ -129,46 +77,4 @@ return [
             'dynamic_qr' => 'https://api.safaricom.co.ke/mpesa/qrcode/v1/generate',
         ],
     ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Default Result Type
-    |--------------------------------------------------------------------------
-    |
-    | Whether to return raw response or processed array
-    |
-    */
-    'result_type' => 'array', // 'array', 'object', 'raw'
-
-    /*
-    |--------------------------------------------------------------------------
-    | Logging
-    |--------------------------------------------------------------------------
-    |
-    | Enable/disable logging of API requests and responses
-    |
-    */
-    'logging' => [
-        'enabled' => env('MPESA_LOGGING', true),
-        'channel' => env('MPESA_LOG_CHANNEL', 'daily'),
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Timeout
-    |--------------------------------------------------------------------------
-    |
-    | HTTP request timeout in seconds
-    |
-    */
-    'timeout' => env('MPESA_TIMEOUT', 30),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Initiator Credentials (for B2C, Reversals, etc.)
-    |--------------------------------------------------------------------------
-    */
-    'initiator' => env('MPESA_INITIATOR_NAME', ''),
-    'initiator_password' => env('MPESA_INITIATOR_PASSWORD', ''),
-    'security_credential' => env('MPESA_SECURITY_CREDENTIAL', ''),
 ];

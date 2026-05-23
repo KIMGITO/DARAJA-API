@@ -3,12 +3,13 @@
 namespace Codenson\Daraja\Services;
 
 use GuzzleHttp\Client;
+use Codenson\Daraja\Exceptions\DarajaException;
 
 class C2BService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -19,11 +20,17 @@ class C2BService
 
     /**
      * Register C2B URLs for validation and confirmation
-     * @param array $data {
-     *     confirmation_url?: string,
-     *     validation_url?: string
-     * }
-     *  @return array|object
+     * 
+     * @param string|null $confirmationUrl URL for payment confirmation
+     * @param string|null $validationUrl URL for payment validation
+     * @return array|object Registration response
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::c2b()->registerURLs(
+     *     'https://your-domain.com/c2b/confirmation',
+     *     'https://your-domain.com/c2b/validation'
+     * );
      */
     public function registerURLs(?string $confirmationUrl = null, ?string $validationUrl = null)
     {
@@ -48,7 +55,7 @@ class C2BService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 
@@ -57,10 +64,12 @@ class C2BService
 
     /**
      * Simulate C2B transaction (sandbox only)
-     * @param string $phoneNumber
-     * @param float $amount
-     * @param string $commandId (CustomerPayBillOnline or CustomerBuyGoodsOnline)
-      *  @return array|object
+     * 
+     * @param string $phoneNumber Customer phone number
+     * @param float $amount Transaction amount
+     * @param string $commandId Command ID (CustomerPayBillOnline or CustomerBuyGoodsOnline)
+     * @return array|object Simulation response
+     * @throws DarajaException
      */
     public function simulate(string $phoneNumber, float $amount, string $commandId = 'CustomerPayBillOnline')
     {
@@ -86,7 +95,7 @@ class C2BService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

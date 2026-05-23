@@ -5,6 +5,8 @@ namespace Codenson\Daraja\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Laravel Daraja Facade for M-PESA APIs
+ * 
  * @method static \Codenson\Daraja\Services\AuthService auth()
  * @method static string getAccessToken()
  * @method static \Codenson\Daraja\Services\STKPushService stkPush()

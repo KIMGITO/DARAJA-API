@@ -3,12 +3,13 @@
 namespace Codenson\Daraja\Services;
 
 use GuzzleHttp\Client;
+use Codenson\Daraja\Exceptions\DarajaException;
 
 class DynamicQRService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -19,15 +20,21 @@ class DynamicQRService
 
     /**
      * Generate dynamic QR code
+     * 
      * @param array $data {
-     *     merchant_name: string,
-     *     ref_no: string,
-     *     amount: float,
-     *     trx_code?: string (BG=Buy Goods, PB=Paybill),
-     *     cpi?: string (default: shortcode),
-     *     size?: string (default: 300)
+     *     required: merchant_name, ref_no, amount
+     *     optional: trx_code (BG/PB), cpi, size
      * }
-      *  @return array|object
+     * @return array|object QR code response with base64 image
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::dynamicQR()->generate([
+     *     'merchant_name' => 'My Store',
+     *     'ref_no' => 'INV-001',
+     *     'amount' => 1500,
+     *     'trx_code' => 'BG'
+     * ]);
      */
     public function generate(array $data)
     {
@@ -37,7 +44,7 @@ class DynamicQRService
             'MerchantName' => $data['merchant_name'],
             'RefNo' => $data['ref_no'],
             'Amount' => (float) $data['amount'],
-            'TrxCode' => $data['trx_code'] ?? 'BG', // BG - Buy Goods, PB - Paybill
+            'TrxCode' => $data['trx_code'] ?? 'BG',
             'CPI' => $data['cpi'] ?? $this->config['shortcode'],
             'Size' => $data['size'] ?? '300',
         ];
@@ -54,7 +61,7 @@ class DynamicQRService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

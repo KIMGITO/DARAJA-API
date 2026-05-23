@@ -7,9 +7,9 @@ use Codenson\Daraja\Exceptions\DarajaException;
 
 class MpesaRatibaService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -22,105 +22,142 @@ class MpesaRatibaService
      * Create standing order (M-Pesa Ratiba)
      * 
      * @param array $data {
-     *     amount: float,
-     *     phone_number: string,
-     *     start_date: string (Y-m-d),
-     *     end_date: string (Y-m-d),
-     *     frequency: string (DAILY, WEEKLY, MONTHLY),
-     *     day_of_month?: int (1-31 for monthly),
-     *     day_of_week?: string (MON, TUE, etc. for weekly),
-     *     account_reference: string
+     *     required: amount, phone_number, start_date, end_date, frequency, account_reference
+     *     optional: day_of_month (for monthly), day_of_week (for weekly), remarks
      * }
-     *  @return array|object
+     * @return array|object Standing order creation response
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::mpesaRatiba()->create([
+     *     'amount' => 1000,
+     *     'phone_number' => '254712345678',
+     *     'start_date' => '2025-02-01',
+     *     'end_date' => '2025-12-31',
+     *     'frequency' => 'MONTHLY',
+     *     'day_of_month' => 15,
+     *     'account_reference' => 'LOAN-001'
+     * ]);
      */
     public function create(array $data)
     {
-        $accessToken = $this->authService->getAccessToken();
-        
-        $payload = [
-            'ShortCode' => $this->config['shortcode'],
-            'Amount' => (int) $data['amount'],
-            'PhoneNumber' => $data['phone_number'],
-            'StartDate' => $data['start_date'],
-            'EndDate' => $data['end_date'],
-            'Frequency' => $data['frequency'],
-            'DayOfMonth' => $data['day_of_month'] ?? null,
-            'DayOfWeek' => $data['day_of_week'] ?? null,
-            'AccountReference' => $data['account_reference'],
-            'Remarks' => $data['remarks'] ?? 'Standing order',
-            'CallBackURL' => $data['callback_url'] ?? $this->config['callback_urls']['stk_push'],
-        ];
+        try {
+            $accessToken = $this->authService->getAccessToken();
 
-        // Remove null values
-        $payload = array_filter($payload, function($value) {
-            return !is_null($value);
-        });
+            $payload = [
+                'ShortCode' => $this->config['shortcode'],
+                'Amount' => (int) $data['amount'],
+                'PhoneNumber' => $data['phone_number'],
+                'StartDate' => $data['start_date'],
+                'EndDate' => $data['end_date'],
+                'Frequency' => $data['frequency'],
+                'DayOfMonth' => $data['day_of_month'] ?? null,
+                'DayOfWeek' => $data['day_of_week'] ?? null,
+                'AccountReference' => $data['account_reference'],
+                'Remarks' => $data['remarks'] ?? 'Standing order',
+                'CallBackURL' => $data['callback_url'] ?? $this->config['callback_urls']['stk_push'],
+            ];
 
-        $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'];
+            $payload = array_filter($payload, function ($value) {
+                return !is_null($value);
+            });
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'];
 
-        $result = json_decode($response->getBody(), true);
+            $response = $this->client->post($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
 
-        if ($this->config['result_type'] === 'object') {
-            return (object) $result;
+            $result = json_decode($response->getBody(), true);
+
+            if (($this->config['result_type'] ?? 'array') === 'object') {
+                return (object) $result;
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new DarajaException('Standing order creation failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
-
-        return $result;
     }
 
     /**
      * Cancel standing order
+     * 
+     * @param string $orderId Standing order ID
+     * @return array|object Cancellation response
+     * @throws DarajaException
      */
-    public function cancel(string $orderId): array
+    public function cancel(string $orderId)
     {
-        $accessToken = $this->authService->getAccessToken();
-        
-        $payload = [
-            'OrderID' => $orderId,
-            'Command' => 'CANCEL',
-        ];
+        try {
+            $accessToken = $this->authService->getAccessToken();
 
-        $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'] . '/cancel';
+            $payload = [
+                'OrderID' => $orderId,
+                'Command' => 'CANCEL',
+            ];
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'] . '/cancel';
 
-        return json_decode($response->getBody(), true);
+            $response = $this->client->post($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
+
+            $result = json_decode($response->getBody(), true);
+
+            if (($this->config['result_type'] ?? 'array') === 'object') {
+                return (object) $result;
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new DarajaException('Standing order cancellation failed: ' . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**
      * Query standing order status
+     * 
+     * @param string $orderId Standing order ID
+     * @return array|object Standing order status
+     * @throws DarajaException
      */
-    public function query(string $orderId): array
+    public function query(string $orderId)
     {
-        $accessToken = $this->authService->getAccessToken();
-        
-        $payload = [
-            'OrderID' => $orderId,
-        ];
+        try {
+            $accessToken = $this->authService->getAccessToken();
 
-        $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'] . '/query';
+            $payload = [
+                'OrderID' => $orderId,
+            ];
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            $endpoint = $this->config['endpoints'][$this->config['environment']]['mpesa_ratiba'] . '/query';
 
-        return json_decode($response->getBody(), true);
+            $response = $this->client->post($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
+
+            $result = json_decode($response->getBody(), true);
+
+            if (($this->config['result_type'] ?? 'array') === 'object') {
+                return (object) $result;
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            throw new DarajaException('Standing order query failed: ' . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 }

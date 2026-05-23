@@ -7,9 +7,9 @@ use Codenson\Daraja\Exceptions\DarajaException;
 
 class STKPushService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -20,8 +20,21 @@ class STKPushService
 
     /**
      * Initiate STK Push (Lipa Na M-PESA Online)
-     * @param array $data 
-     *  @return array|object
+     * 
+     * @param array $data {
+     *     required: amount, phone_number, account_reference, transaction_desc
+     *     optional: transaction_type, callback_url, shortcode, passkey
+     * }
+     * @return array|object Response from M-PESA API
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::stkPush()->request([
+     *     'amount' => 10,
+     *     'phone_number' => '254712345678',
+     *     'account_reference' => 'INV-001',
+     *     'transaction_desc' => 'Payment for goods'
+     * ]);
      */
     public function request(array $data)
     {
@@ -39,12 +52,12 @@ class STKPushService
             'Timestamp' => $timestamp,
             'TransactionType' => $data['transaction_type'] ?? 'CustomerPayBillOnline',
             'Amount' => (int) $data['amount'],
-            'PartyA' => $data['phone_number'], // Customer phone number
+            'PartyA' => $data['phone_number'],
             'PartyB' => $shortcode,
             'PhoneNumber' => $data['phone_number'],
             'CallBackURL' => $data['callback_url'] ?? $this->config['callback_urls']['stk_push'],
-            'AccountReference' => $data['account_reference'] ?? 'Payment',
-            'TransactionDesc' => $data['transaction_desc'] ?? 'Payment for goods/services',
+            'AccountReference' => $data['account_reference'],
+            'TransactionDesc' => $data['transaction_desc'],
         ];
 
         $endpoint = $this->config['endpoints'][$this->config['environment']]['stk_push'];
@@ -59,7 +72,7 @@ class STKPushService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 
@@ -68,8 +81,13 @@ class STKPushService
 
     /**
      * Query STK Push status
-     * @param string $checkoutRequestID
-      *  @return array|object
+     * 
+     * @param string $checkoutRequestID The CheckoutRequestID from stkPush request
+     * @return array|object Transaction status
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::stkPush()->query('ws_CO_123456789');
      */
     public function query(string $checkoutRequestID)
     {
@@ -100,7 +118,7 @@ class STKPushService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

@@ -7,9 +7,9 @@ use Codenson\Daraja\Exceptions\DarajaException;
 
 class AccountBalanceService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -22,11 +22,15 @@ class AccountBalanceService
      * Query account balance
      * 
      * @param array $data {
-     *     shortcode?: string,
-     *     identifier_type?: int (1=MSISDN,2=Till,3=Shortcode,4=Organization),
-     *     remarks?: string
+     *     optional: shortcode, identifier_type, remarks, initiator, security_credential
      * }
-     *  @return array|object
+     * @return array|object Account balance details
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::accountBalance()->query([
+     *     'remarks' => 'Daily balance check'
+     * ]);
      */
     public function query(array $data = [])
     {
@@ -55,7 +59,7 @@ class AccountBalanceService
 
         $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
+        if (($this->config['result_type'] ?? 'array') === 'object') {
             return (object) $result;
         }
 

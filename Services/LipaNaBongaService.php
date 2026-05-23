@@ -7,9 +7,9 @@ use Codenson\Daraja\Exceptions\DarajaException;
 
 class LipaNaBongaService
 {
-    protected $client;
-    protected $config;
-    protected $authService;
+    protected Client $client;
+    protected array $config;
+    protected AuthService $authService;
 
     public function __construct(array $config, AuthService $authService)
     {
@@ -22,68 +22,95 @@ class LipaNaBongaService
      * Pay with Bonga Points
      * 
      * @param array $data {
-     *     amount: float,
-     *     phone_number: string,
-     *     bonga_points: int,
-     *     till_number: string,
-     *     account_reference: string
+     *     required: amount, phone_number, bonga_points, account_reference
+     *     optional: till_number, description
      * }
-     *  @return array|object
+     * @return array|object Payment response
+     * @throws DarajaException
+     * 
+     * @example
+     * $response = Daraja::lipaNaBonga()->pay([
+     *     'amount' => 500,
+     *     'phone_number' => '254712345678',
+     *     'bonga_points' => 1000,
+     *     'till_number' => '123456',
+     *     'account_reference' => 'ORDER-001'
+     * ]);
      */
     public function pay(array $data)
     {
-        $accessToken = $this->authService->getAccessToken();
-        
-        $payload = [
-            'Amount' => (int) $data['amount'],
-            'PhoneNumber' => $data['phone_number'],
-            'BongaPoints' => (int) $data['bonga_points'],
-            'TillNumber' => $data['till_number'] ?? $this->config['till_number'],
-            'AccountReference' => $data['account_reference'],
-            'TransactionDesc' => $data['description'] ?? 'Payment with Bonga Points',
-        ];
+        try {
+            $accessToken = $this->authService->getAccessToken();
+            
+            $payload = [
+                'Amount' => (int) $data['amount'],
+                'PhoneNumber' => $data['phone_number'],
+                'BongaPoints' => (int) $data['bonga_points'],
+                'TillNumber' => $data['till_number'] ?? $this->config['till_number'],
+                'AccountReference' => $data['account_reference'],
+                'TransactionDesc' => $data['description'] ?? 'Payment with Bonga Points',
+            ];
 
-        $endpoint = $this->config['endpoints'][$this->config['environment']]['lipa_na_bonga'];
+            $endpoint = $this->config['endpoints'][$this->config['environment']]['lipa_na_bonga'];
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            $response = $this->client->post($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
 
-        $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);
 
-        if ($this->config['result_type'] === 'object') {
-            return (object) $result;
+            if (($this->config['result_type'] ?? 'array') === 'object') {
+                return (object) $result;
+            }
+
+            return $result;
+            
+        } catch (\Exception $e) {
+            throw new DarajaException('Lipa na Bonga payment failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
-
-        return $result;
     }
 
     /**
      * Check Bonga Points balance
+     * 
+     * @param string $phoneNumber Phone number to check
+     * @return array|object Bonga points balance
+     * @throws DarajaException
      */
-    public function checkBalance(string $phoneNumber): array
+    public function checkBalance(string $phoneNumber)
     {
-        $accessToken = $this->authService->getAccessToken();
-        
-        $payload = [
-            'PhoneNumber' => $phoneNumber,
-            'Command' => 'CheckBalance',
-        ];
+        try {
+            $accessToken = $this->authService->getAccessToken();
+            
+            $payload = [
+                'PhoneNumber' => $phoneNumber,
+                'Command' => 'CheckBalance',
+            ];
 
-        $endpoint = $this->config['endpoints'][$this->config['environment']]['lipa_na_bonga'] . '/balance';
+            $endpoint = $this->config['endpoints'][$this->config['environment']]['lipa_na_bonga'] . '/balance';
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
+            $response = $this->client->post($endpoint, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                    'Content-Type' => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
 
-        return json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);
+
+            if (($this->config['result_type'] ?? 'array') === 'object') {
+                return (object) $result;
+            }
+
+            return $result;
+            
+        } catch (\Exception $e) {
+            throw new DarajaException('Bonga balance check failed: ' . $e->getMessage(), $e->getCode(), $e);
+        }
     }
 }
