@@ -1,47 +1,34 @@
 {
-  "name": "codenson/laravel-daraja-api",
-  "description": "A comprehensive Laravel package for Safaricom Daraja APIs - Complete M-PESA integration",
-  "type": "library",
-  "license": "MIT",
-  "authors": [
-    {
-      "name": "Codenson",
-      "email": "kimanthidennis02@gmail.com"
-    }
-  ],
-  "require": {
-    "php": "^8.0|^8.1|^8.2|^8.3",
-    "illuminate/support": "^9.0|^10.0|^11.0",
-    "guzzlehttp/guzzle": "^7.0",
-    "ext-json": "*"
-  },
-  "require-dev": {
-    "phpunit/phpunit": "^9.0|^10.0",
-    "orchestra/testbench": "^7.0|^8.0|^9.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "Codenson\\Daraja\\": "src/"
+    "name": "codenson/laravel-daraja-api",
+    "description": "A Laravel package for integrating with the M-PESA Daraja API.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dennis Kimanthi",
+            "email": "kimanthidennis02@gmail.com",
+            "role": "Developer",
+            "homepage": "https://github.com/KIMGITO"
+
+        }
+
+    ],
+    "require": {
+        "php": "^8.0|^8.1|^8.2|^8.3",
+        "guzzlehttp/guzzle": "^7.0",
+        "ext-json": "*"
     },
-    "files": [
-      "src/Helpers/helpers.php"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Codenson\\Daraja\\Tests\\": "tests/"
+    "require-dev": {
+        "illuminate/support": "^9.0|^10.0|^11.0",
+        "phpunit/phpunit": "^9.0|^10.0",
+        "orchestra/testbench": "^7.0|^8.0|^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Codenson\\Daraja\\": "src/"
+        },
+        "files": [
+            "src/Helpers/helpers.php"
+        ]
     }
-  },
-  "extra": {
-    "laravel": {
-      "providers": [
-        "Codenson\\Daraja\\DarajaServiceProvider"
-      ],
-      "aliases": {
-        "Daraja": "Codenson\\Daraja\\Facades\\Daraja"
-      }
-    }
-  },
-  "minimum-stability": "stable",
-  "prefer-stable": true
 }
