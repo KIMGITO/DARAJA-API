@@ -67,10 +67,8 @@ A comprehensive Laravel package for Safaricom Daraja APIs - Complete M-PESA inte
 ```bash
 composer require codenson/laravel-daraja
 
-php artisan vendor:publish --tag=daraja-config
+php artisan codenson:install
 
-php artisan vendor:publish --tag=daraja-migrations
-php artisan migrate
 ```
 ## ⚙️ Configuration
 ```bash
