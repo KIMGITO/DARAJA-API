@@ -3,6 +3,7 @@
 namespace Codenson\Daraja;
 
 use Codenson\Daraja\Console\Commands\DarajaInstallCommand;
+use Codenson\Daraja\Daraja;
 use Codenson\Daraja\Services\AuthService;
 use Illuminate\Support\ServiceProvider;
 
