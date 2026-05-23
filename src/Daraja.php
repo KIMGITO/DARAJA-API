@@ -24,6 +24,9 @@ use Codenson\Daraja\Services\{
     DynamicQRService
 };
 
+/**
+ * Daraja M-PESA API Main Class
+ */
 class Daraja
 {
     protected array $config;

@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Codenson\\Daraja-api\\' => array($baseDir . '/src'),
+    'Codenson\\Daraja\\' => array($baseDir . '/src'),
 );

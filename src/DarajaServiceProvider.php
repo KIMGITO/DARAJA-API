@@ -2,10 +2,8 @@
 
 namespace Codenson\Daraja;
 
-use Codenson\Daraja\Console\Commands\DarajaInstallCommand;
-use Codenson\Daraja\Daraja;
-use Codenson\Daraja\Services\AuthService;
 use Illuminate\Support\ServiceProvider;
+use Codenson\Daraja\Services\AuthService;
 
 class DarajaServiceProvider extends ServiceProvider
 {
@@ -24,18 +22,18 @@ class DarajaServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Load migrations directly without publishing
         if ($this->app->runningInConsole()) {
-            // Register commands
-            $this->commands([
-                DarajaInstallCommand::class,
-            ]);
-            $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-
-            // Publish config only
+            // Publish config
             $this->publishes([
                 __DIR__ . '/Config/daraja.php' => config_path('daraja.php'),
             ], 'daraja-config');
+
+            // Publish migrations
+            if (is_dir(__DIR__ . '/../database/migrations')) {
+                $this->publishes([
+                    __DIR__ . '/../database/migrations' => database_path('migrations'),
+                ], 'daraja-migrations');
+            }
         }
     }
 }
