@@ -22,7 +22,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Codenson\\Daraja\\": "src/"
+      "Codenson\\Daraja-api\\": "src/"
     },
     "files": [
       "src/Helpers/helpers.php"
